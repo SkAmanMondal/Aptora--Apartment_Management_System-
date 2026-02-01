@@ -1,0 +1,137 @@
+*{
+    margin: 0%;
+    padding: 0%;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+html,body{
+    height: 100%;
+    width: 100%;
+}
+/* MANAGE APARTMENTS TABLE */
+
+.table-card {
+    background: white;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f1f5f9;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+th {
+    font-weight: 600;
+    color: #333;
+}
+
+tr {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+tr:last-child {
+    border-bottom: none;
+}
+
+/* ACTION BUTTONS */
+
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    text-decoration: none;
+    margin-right: 6px;
+    display: inline-block;
+}
+
+.action-btn.edit {
+    background: #2c7be5;
+    color: white;
+}
+
+.action-btn.delete {
+    background: #dc2626;
+    color: white;
+}
+
+.action-btn.edit:hover {
+    background: #1a68d1;
+}
+
+.action-btn.delete:hover {
+    background: #b91c1c;
+}
+
+/* ADMIN STATUS */
+
+.status {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 6px;
+}
+
+.status.not-assigned {
+    color: #dc2626;
+}
+
+.status.assigned {
+    color: #16a34a;
+}
+
+/* MINI ADMIN BUTTONS */
+
+.mini-btn {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: white;
+    margin-right: 4px;
+}
+
+.mini-btn.set {
+    background: #0ea5e9;
+}
+
+.mini-btn.view {
+    background: #475569;
+}
+
+.mini-btn.change {
+    background: #f59e0b;
+}
+
+.mini-btn:hover {
+    opacity: 0.9;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+    th, td {
+        font-size: 13px;
+    }
+
+    .mini-btn,
+    .action-btn {
+        margin-top: 4px;
+    }
+}
