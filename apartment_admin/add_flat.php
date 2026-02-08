@@ -67,14 +67,44 @@ if (isset($_POST['submit'])) {
 <!-- MAIN LAYOUT -->
 <div class="container">
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <a href="dashboard.php"><i class="ri-box-3-fill"></i> Dashboard</a>
-        <a href="add_flat.php" class="active"><i class="ri-file-add-line"></i> Add Flat</a>
-        <a href="manage_flats.php"><i class="ri-home-gear-fill"></i> Manage Flats</a>
-        <a href="payments.php"><i class="ri-hand-coin-fill"></i> Payments</a>
-        <a href="profile.php"><i class="ri-account-circle-line"></i> profile</a>
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <a href="dashboard.php">
+        <i class="ri-dashboard-fill"></i> Dashboard
+    </a>
+
+    <!-- ===== FLATS GROUP START ===== -->
+    <div class="sidebar-group">
+
+        <div class="group-title active" onclick="toggleFlats()">
+            <i class="ri-building-fill"></i> Flats
+            <i class="ri-arrow-down-s-line arrow"></i>
+        </div>
+
+        <div class="group-items" id="flatsMenu">
+
+            <a href="add_flat.php" class="active">
+                <i class="ri-add-circle-fill"></i> Add Flat
+            </a>
+
+            <a href="manage_flats.php">
+                <i class="ri-settings-3-fill"></i> Manage Flats
+            </a>
+
+        </div>
+
     </div>
+    <!-- ===== FLATS GROUP END ===== -->
+
+    <a href="maintanance.php">
+        <i class="ri-hand-coin-fill"></i> Maintenance
+    </a>
+
+    <a href="profile.php">
+        <i class="ri-user-fill"></i> Profile
+    </a>
+
+</div>
 
     <!-- CONTENT -->
     <div class="content">
@@ -125,3 +155,15 @@ if (isset($_POST['submit'])) {
 
 </body>
 </html>
+
+<script>
+    function toggleFlats() {
+        var menu = document.getElementById("flatsMenu");
+
+        if (menu.style.display === "block") {
+            menu.style.display = "none";
+        } else {
+            menu.style.display = "block";
+        }
+    }
+</script>

@@ -56,11 +56,44 @@ $pending_amount = $total_expected - $total_collected;
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-    <a href="dashboard.php" class="active"><i class="ri-dashboard-fill"></i> Dashboard</a>
-    <a href="manage_flats.php"><i class="ri-building-fill"></i> Flats</a>
-    <a href="maintanance.php"><i class="ri-hand-coin-fill"></i> Maintenance</a>
-    <a href="profile.php"><i class="ri-user-fill"></i> Profile</a>
+
+    <a href="dashboard.php" class="active">
+        <i class="ri-dashboard-fill"></i> Dashboard
+    </a>
+
+    <!-- ===== FLATS GROUP START ===== -->
+    <div class="sidebar-group">
+
+        <div class="group-title" onclick="toggleFlats()">
+            <i class="ri-building-fill"></i> Flats
+            <i class="ri-arrow-down-s-line arrow"></i>
+        </div>
+
+        <div class="group-items" id="flatsMenu">
+
+            <a href="add_flat.php">
+                <i class="ri-add-circle-fill"></i> Add Flat
+            </a>
+
+            <a href="manage_flats.php">
+                <i class="ri-settings-3-fill"></i> Manage Flats
+            </a>
+
+        </div>
+
+    </div>
+    <!-- ===== FLATS GROUP END ===== -->
+
+    <a href="maintanance.php">
+        <i class="ri-hand-coin-fill"></i> Maintenance
+    </a>
+
+    <a href="profile.php">
+        <i class="ri-user-fill"></i> Profile
+    </a>
+
 </div>
+
 
 <!-- CONTENT -->
 <div class="content">
@@ -106,6 +139,17 @@ $pending_amount = $total_expected - $total_collected;
 </div>
 
 <script>
+
+function toggleFlats() {
+        var menu = document.getElementById("flatsMenu");
+
+        if (menu.style.display === "block") {
+            menu.style.display = "none";
+        } else {
+            menu.style.display = "block";
+        }
+    }
+
 /* OCCUPANCY PIE */
 new Chart(occupancyChart, {
     type: 'pie',
