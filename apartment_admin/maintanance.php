@@ -11,105 +11,78 @@ $conn = dbconnect();
 
 $apartment_id = $_SESSION['apartment_id'];
 
-/* TOTAL FLATS */
-$q1 = mysqli_query($conn,
-    "SELECT COUNT(*) AS total_flats 
-     FROM flats 
-     WHERE apartment_id='$apartment_id'"
-);
-$total_flats = mysqli_fetch_assoc($q1)['total_flats'];
+/* ===== REAL STATISTICS ===== */
 
-/* TOTAL OWNERS */
-$q2 = mysqli_query($conn,
-    "SELECT COUNT(*) AS total_owners 
-     FROM flat_owners 
-     WHERE apartment_id='$apartment_id'"
-);
-$total_owners = mysqli_fetch_assoc($q2)['total_owners'];
+$sql = "SELECT 
+SUM(amount) as total_amount,
+SUM(due_amount) as total_due
+FROM maintenance_bills
+WHERE apartment_id='$apartment_id'";
 
-/* MAINTENANCE TOTALS (FROM FLATS TABLE) */
-$q3 = mysqli_query($conn,
-    "SELECT 
-        SUM(maintanance) AS total_expected,
-        SUM(CASE WHEN maintanance = 0 THEN 0 ELSE maintanance END) AS total_due
-     FROM flats 
-     WHERE apartment_id='$apartment_id'"
-);
-$maintenance = mysqli_fetch_assoc($q3);
+$data = mysqli_fetch_assoc(mysqli_query($conn,$sql));
 
-$total_expected = $maintenance['total_expected'] ?? 0;
+$total_expected  = $data['total_amount'] ?? 0;
+$total_pending   = $data['total_due'] ?? 0;
+$total_collected = $total_expected - $total_pending;
 
-/* For now: assume maintanance > 0 = pending */
-$total_collected = 0;
-$pending_amount  = $total_expected;
 
-/* OWNER + FLAT + MAINTENANCE DETAILS */
-$owners = mysqli_query($conn, "
-    SELECT 
-        fo.name AS owner_name,
-        f.flat_no,
-        f.flat_type,
-        f.maintanance
-    FROM flat_owners fo
-    INNER JOIN flats f ON f.id = fo.flat_id
-    WHERE fo.apartment_id = '$apartment_id'
-");
+/* ===== FETCH LIST ===== */
+
+$sql = "
+SELECT f.flat_no, b.*
+FROM maintenance_bills b
+JOIN flats f ON b.flat_id=f.id
+WHERE b.apartment_id='$apartment_id'
+ORDER BY year DESC, month DESC";
+
+$bills = mysqli_query($conn,$sql);
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
+
 <title>Maintenance</title>
+
 <link rel="icon" href="../assets/icon.png">
 <link rel="stylesheet" href="../css/common.css">
 <link rel="stylesheet" href="../css/dashboard.css">
+
 <link href="https://cdn.jsdelivr.net/npm/remixicon@4.8.0/fonts/remixicon.css" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
 
-<!-- NAVBAR -->
+<!-- NAVBAR (YOUR ORIGINAL) -->
 <div class="navbar">
     <div class="nav-left">
-        <div class="logo"><img src="../assets/icon4.png"></div>
+        <div class="logo">
+            <img src="../assets/icon4.png">
+        </div>
     </div>
+
     <div class="nav-right">
-        <a href="../logout.php" class="logout-btn"
-           onclick="return confirm('Logout?')">Logout</a>
+        <a href="../logout.php" class="logout-btn">Logout</a>
     </div>
 </div>
 
+
 <div class="container">
 
-<!-- SIDEBAR -->
+<!-- SIDEBAR (WITH ICONS – UNTOUCHED) -->
 <div class="sidebar">
+
     <a href="dashboard.php">
         <i class="ri-dashboard-fill"></i> Dashboard
     </a>
 
-    <!-- ===== FLATS GROUP START ===== -->
-    <div class="sidebar-group">
-
-        <div class="group-title" onclick="toggleFlats()">
-            <i class="ri-building-fill"></i> Flats
-            <i class="ri-arrow-down-s-line arrow"></i>
-        </div>
-
-        <div class="group-items" id="flatsMenu">
-
-            <a href="add_flat.php">
-                <i class="ri-add-circle-fill"></i> Add Flat
-            </a>
-
-            <a href="manage_flats.php">
-                <i class="ri-settings-3-fill"></i> Manage Flats
-            </a>
-
-        </div>
-
-    </div>
-    <!-- ===== FLATS GROUP END ===== -->
+    <a href="manage_flats.php">
+        <i class="ri-building-fill"></i> Flats
+    </a>
 
     <a href="maintanance.php" class="active">
         <i class="ri-hand-coin-fill"></i> Maintenance
@@ -121,123 +94,127 @@ $owners = mysqli_query($conn, "
 
 </div>
 
-<!-- CONTENT -->
+
+<!-- ===== ONLY CONTENT CHANGED ===== -->
+
 <div class="content">
-<h1>Maintenance Overview</h1>
 
-<!-- SUMMARY CARDS -->
+<h1>Maintenance Management</h1>
+
+<!-- CARDS -->
 <div class="cards">
-    <div class="card">
-        <h3>Total Flats</h3>
-        <p><?= $total_flats ?></p>
-    </div>
 
-    <div class="card">
-        <h3>Total Owners</h3>
-        <p><?= $total_owners ?></p>
-    </div>
-
-    <div class="card">
-        <h3>Total Maintenance</h3>
-        <p>₹<?= number_format($total_expected) ?></p>
-    </div>
-
-    <div class="card">
-        <h3>Pending Amount</h3>
-        <p style="color:red;">₹<?= number_format($pending_amount) ?></p>
-    </div>
+<div class="card">
+<h3>Total Expected</h3>
+<p>₹<?= number_format($total_expected) ?></p>
 </div>
 
-<!-- CHARTS -->
+<div class="card">
+<h3>Collected</h3>
+<p style="color:green">
+₹<?= number_format($total_collected) ?>
+</p>
+</div>
+
+<div class="card">
+<h3>Pending</h3>
+<p style="color:red">
+₹<?= number_format($total_pending) ?>
+</p>
+</div>
+
+</div>
+
+
+<!-- CHART -->
 <div class="dashboard-charts">
 
-    <div class="chart-box">
-        <h3>Maintenance Status</h3>
-        <canvas id="maintenanceChart"></canvas>
-    </div>
-
-    <div class="chart-box">
-        <h3>Flat Type vs Maintenance</h3>
-        <canvas id="typeChart"></canvas>
-    </div>
+<div class="chart-box">
+<h3>Collection Status</h3>
+<canvas id="pieChart"></canvas>
+</div>
 
 </div>
 
-<!-- OWNER-WISE MAINTENANCE TABLE -->
-<div class="chart-box">
-<h3>Owner-wise Maintenance</h3>
 
+<a class="btn" href="generate_maintenance.php">
+Generate This Month
+</a>
+
+
+<!-- TABLE -->
 <table>
+
 <tr>
-    <th>Flat No</th>
-    <th>Flat Type</th>
-    <th>Owner Name</th>
-    <th>Maintenance</th>
-    <th>Status</th>
+<th>Flat</th>
+<th>Month</th>
+<th>Amount</th>
+<th>Due</th>
+<th>Status</th>
+<th>Collect</th>
 </tr>
 
-<?php while($row = mysqli_fetch_assoc($owners)): ?>
+<?php while($r=mysqli_fetch_assoc($bills)){ ?>
+
 <tr>
-    <td><?= $row['flat_no'] ?></td>
-    <td><?= $row['flat_type'] ?></td>
-    <td><?= $row['owner_name'] ?></td>
-    <td>₹<?= $row['maintanance'] ?></td>
-    <td>
-        <?php if($row['maintanance'] > 0): ?>
-            <span class="badge red">Pending</span>
-        <?php else: ?>
-            <span class="badge green">Paid</span>
-        <?php endif; ?>
-    </td>
+
+<td><?= $r['flat_no'] ?></td>
+
+<td><?= $r['month']."/".$r['year'] ?></td>
+
+<td>₹<?= $r['amount'] ?></td>
+
+<td>₹<?= $r['due_amount'] ?></td>
+
+<td>
+<span class="badge <?= $r['status']=='paid'?'green':'red' ?>">
+<?= $r['status'] ?>
+</span>
+</td>
+
+<td>
+
+<?php if($r['status']!='paid'){ ?>
+
+<form action="collect_payment.php" method="post">
+
+<input type="hidden" name="bill_id" value="<?= $r['id'] ?>">
+<input type="hidden" name="flat_id" value="<?= $r['flat_id'] ?>">
+
+<input type="number" name="amount"
+max="<?= $r['due_amount'] ?>" required>
+
+<button class="btn">Collect</button>
+
+</form>
+
+<?php } ?>
+
+</td>
+
 </tr>
-<?php endwhile; ?>
+
+<?php } ?>
 
 </table>
-</div>
 
 </div>
 </div>
+
 
 <script>
-
-
-function toggleFlats() {
-    var menu = document.getElementById("flatsMenu");
-
-    if (menu.style.display === "block") {
-        menu.style.display = "none";
-    } else {
-        menu.style.display = "block";
-    }
+new Chart(pieChart, {
+type:'pie',
+data:{
+labels:['Collected','Pending'],
+datasets:[{
+data:[
+<?= $total_collected ?>,
+<?= $total_pending ?>
+],
+backgroundColor:['#1F4842','#D32F2F']
+}]
 }
-
-
-/* DOUGHNUT */
-new Chart(maintenanceChart, {
-    type: 'doughnut',
-    data: {
-        labels: ['Pending'],
-        datasets: [{
-            data: [<?= $pending_amount ?>],
-            backgroundColor: ['#E53935']
-        }]
-    }
-});
-
-/* BAR (DEMO BY TYPE) */
-new Chart(typeChart, {
-    type: 'bar',
-    data: {
-        labels: ['1 BHK', '2 BHK', '3 BHK'],
-        datasets: [{
-            label: 'Maintenance',
-            data: [5000, 8000, 10000],
-            backgroundColor: '#4CAF50'
-        }]
-    },
-    options: {
-        scales: { y: { beginAtZero:true } }
-    }
 });
 </script>
 

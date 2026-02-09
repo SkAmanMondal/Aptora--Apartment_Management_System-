@@ -60,11 +60,36 @@ if (isset($_POST['login'])) {
     }
 
     /* ===== FLAT OWNER LOGIN ===== */
-    elseif ($role === 'owner') {
-        // will be added later
+    /* ===== FLAT OWNER LOGIN ===== */
+elseif ($role === 'owner') {
+
+    $sql = "SELECT * FROM flat_owners WHERE email='$email'";
+    $res = mysqli_query($conn, $sql);
+
+    if ($res && mysqli_num_rows($res) == 1) {
+
+        $row = mysqli_fetch_assoc($res);
+
+        if ($row['password'] == $password) {
+
+            $_SESSION['role'] = 'owner';
+            $_SESSION['user_id'] = $row['id'];
+            $_SESSION['flat_id'] = $row['flat_id'];
+            $_SESSION['apartment_id'] = $row['apartment_id'];
+            $_SESSION['owner_name'] = $row['name'];
+
+            header("Location: flat_owners/dashboard.php");
+            exit;
+
+        } else {
+            $error = "Wrong password";
+        }
+
     } else {
-        $error = "Please select a role";
+        $error = "Flat Owner not found";
     }
+}
+
 }
 ?>
 
