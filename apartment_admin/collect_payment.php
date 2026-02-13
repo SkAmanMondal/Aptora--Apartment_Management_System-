@@ -1,28 +1,44 @@
 <?php
-    $bill_id = $_POST['bill_id'];
-    $flat_id = $_POST['flat_id'];
-    $amount  = $_POST['amount'];
+include "../includes/auth.php";
+include "../db.php";
 
-    mysqli_query($conn,
-    "INSERT INTO maintenance_payments
-    (bill_id,flat_id,amount,payment_date,mode)
-    VALUES
-    ('$bill_id','$flat_id','$amount',NOW(),'cash')");
+$conn = dbconnect();
 
-    // reduce due
-    mysqli_query($conn,
-    "UPDATE maintenance_bills
-    SET due_amount = due_amount - $amount
-    WHERE id='$bill_id'");
+$bill_id = $_POST['bill_id'];
+$amount  = $_POST['amount'];
 
-    // update status
-    mysqli_query($conn,
-    "UPDATE maintenance_bills
-    SET status =
-    CASE
-    WHEN due_amount<=0 THEN 'paid'
-    ELSE 'partial'
-    END
-    WHERE id='$bill_id'");
 
-?>
+/* Get current due */
+
+$row = mysqli_fetch_assoc(mysqli_query($conn,"
+SELECT due_amount, amount
+FROM maintenance_bills
+WHERE id='$bill_id'
+"));
+
+$new_due = $row['due_amount'] - $amount;
+
+
+/* Set status */
+
+if($new_due <= 0)
+{
+$new_due = 0;
+$status = "paid";
+}
+else
+{
+$status = "partial";
+}
+
+
+/* Update */
+
+mysqli_query($conn,"
+UPDATE maintenance_bills
+SET due_amount='$new_due',
+status='$status'
+WHERE id='$bill_id'
+");
+
+header("Location: maintanance.php");

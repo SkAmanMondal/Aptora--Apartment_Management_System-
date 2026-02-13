@@ -120,8 +120,12 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 <!-- NAVBAR -->
 <div class="navbar">
-    <div class="nav-left"><img class="logo" src="../assets/icon4.png"></div>
-    <div class="nav-right">
+    <div class="nav-left">
+    <div class="logo">
+        <img src="../assets/icon4.png">
+    </div>
+</div>
+<div class="nav-right">
         <a href="../logout.php" class="logout-btn" onclick="return confirm('Are you sure you want to Logout....')">Logout</a>
     </div>
 </div>
